@@ -1,0 +1,91 @@
+# Lecture 17 Demo 1 Summarizing functions
+options(prompt = "R>")
+# connect to your database
+PSTAT10db <- dbConnect(RSQLite::SQLite(), "PSTAT10-db.sqlite")
+# check that  your dbi, Rsqilite and sqldf are installed
+
+# what is the average number of items currently ordered?
+dbGetQuery(PSTAT10db, 'SELECT * FROM INVOICES')
+dbGetQuery(PSTAT10db, 'SELECT AVG (QUANTITY) FROM INVOICES')
+
+# for how many items is the biggest order and smallest order?
+dbGetQuery(PSTAT10db, 'SELECT MAX (QUANTITY), MIN (QUANTITY) FROM INVOICES')
+
+# how many items are currently invoiceed?
+dbGetQuery(PSTAT10db, 'SELECT COUNT(*) FROM INVOICES')
+
+# WHAT IS THE AVERAAGE QUANTITY FOR ORDERS OF PRODUCT p2
+dbGetQuery(PSTAT10db, 'SELECT AVG (QUANTITY), MIN (QUANTITY)
+           FROM INVOICES WHERE PROD_NO == "p1"')
+# p2 does not work
+
+# Lecture 17 Demo 2 Testing for null values
+dbGetQuery(PSTAT10db, 'SELECT * FROM DEPARTMENT WHERE MANAGER== "null"')
+
+# Lecture 17 Demo 3 Computation
+# what is the amount due and the quantity ordered for product p2?
+dbGetQuery(PSTAT10db, ' SELECT * FROM INVOICES')
+dbGetQuery(PSTAT10db,' SELECT PROD_NO, QUANTITY, PRICE *QUANTITY FROM INVOICES')
+dbGetQuery(PSTAT10db, 'SELECT PROD_NO, SUM(QUANTITY), SUM(PRICE*QUANTITY) FROM INVOICES
+           WHERE PROD_NO = "p1"')
+
+# Lecture 17 Demo 4 Group By
+dbGetQuery(PSTAT10db, 'SELECT * FROM INVOICES')
+
+# HOW MANY ITEMS ARE IN EACH ORDER?
+dbGetQuery(PSTAT10db, ' SELECT ORDER_NO, SUM(QUANTITY) FROM INVOICES GROUP BY ORDER_NO')
+
+# WHICH ORDERS ARE INVOICED FOR A QUANTITY OF 20 , 000 OR MORE ITEMS?
+dbGetQuery(PSTAT10db, 'SELECT ORDER_NO, SUM(QUANTITY)
+FROM INVOICES GROUP BY ORDER_NO
+HAVING SUM(QUANTITY)>20000')
+
+# LECTURE 17 DEMO 5 ORDER
+# select all from product order by NAME
+dbGetQuery(PSTAT10db, ' SELECT * FROM PRODUCT ORDER BY NAME')
+
+# ordering some examples. Attributes are automatically numbered by RSQLite
+dbGetQuery(PSTAT10db, 'SELECT * FROM PRODUCT')
+dbGetQuery(PSTAT10db, ' SELECT PROD_NO, NAME, COLOR FROM PRODUCT ORDER BY PROD_NO DESC')
+dbGetQuery(PSTAT10db,'SELECT PROD_NO, NAME, COLOR FROM PRODUCT ORDER BY 1 DESC')
+
+# how does ordering work?
+# order by attribute that has the same value twice.
+dbGetQuery(PSTAT10db, ' SELECT * FROM EMPLOYEE')
+dbGetQuery(PSTAT10db, 'SELECT * FROM EMPLOYEE ORDER BY 5 DESC')
+
+# lecture 17 Demo 6 JOIN
+dbGetQuery(PSTAT10db, ' SELECT *FROM CUSTOMER JOIN PRODUCT')
+
+# LECTURE 17 DEMO 8 NATURAL JOIN USE KEYS
+
+# cust_no is primary key of CUSTOMER and a foregin key in SALES_ORDER
+dbGetQuery(PSTAT10db, ' SELECT * FROM SALES_ORDER')
+dbGetQuery(PSTAT10db, ' SELECT * FROM CUSTOMER')
+dbGetQuery(PSTAT10db, ' SELECT ORDER_NO , CUST_NO
+           FROM SALES_ORDER
+           NATURAL JOIN
+           CUSTOMER')
+# LECTURE 17 DEMO 8
+# JOIN ON ATTRIBUTE VALUES
+dbGetQuery(PSTAT10db, 'SELECT * FROM SALES_ORDER_LINE')
+dbGetQuery(PSTAT10db, ' SELECT * FROM PRODUCT')
+dbGetQuery(PSTAT10db, ' SELECT * FROM SALES_ORDER_LINE JOIN PRODUCT
+           ON PRODUCT.PROD_NO = SALES_ORDER_LINE.PROD_NO')
+
+# COMPARE WITH NATURAL JOIN 
+dbGetQuery(PSTAT10db, ' SELECT * FROM SALES_ORDER_LINE NATURAL JOIN PRODUCT')
+
+# LECTURE 17 DEMO 9 SOME SIMPLE CORRELATION NAME EXAMPLES
+dbGetQuery(PSTAT10db, ' SELECT NAME FROM CUSTOMER')
+dbGetQuery(PSTAT10db, ' SELECT C.NAME FROM CUSTOMER C')
+dbGetQuery(PSTAT10db, ' SELECT C.NAME AS FNAME FROM CUSTOMER C')
+
+# RETURN PRODUCT NAME AS LINE_NAME
+dbGetQuery(PSTAT10db, 'SELECT P.NAME AS LINE_NAME FROM PRODUCT P')
+
+# MORE EXAMPLES
+dbGetQuery(PSTAT10db, ' SELECT * FROM PRODUCT, SALES_ORDER_LINE
+           WHERE PRODUCT.PROD_NO = SALES_ORDER_LINE.PROD_NO')
+dbGetQuery(PSTAT10db, 'SELECT * FROM PRODUCT P, SALES_ORDER_LINE S
+           WHERE P.PROD_NO = S.PROD_NO')
